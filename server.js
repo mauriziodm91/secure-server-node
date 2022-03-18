@@ -11,16 +11,6 @@ require('dotenv').config()
 
 const PORT = 3000
 
-function checkLoggedIn(req, res, next) {
-  const isLoggedIn = true
-  if (!isLoggedIn) {
-    res.status(401).json({
-      error: 'You must log in!',
-    })
-  }
-  next()
-}
-
 const config = {
   CLIENT_ID: process.env.CLIENT_ID,
   CLIENT_SECRET: process.env.CLIENT_SECRET,
@@ -41,6 +31,14 @@ function verifyCallback(accessToken, refreshToken, profile, done) {
 
 passport.use(new Strategy(AUTH_OPTIONS, verifyCallback))
 
+passport.serializeUser((user, done) => {
+  done(null, user)
+})
+
+passport.deserializeUser((obj, done) => {
+  done(null, obj)
+})
+
 const app = express()
 
 app.use(helmet())
@@ -54,6 +52,17 @@ app.use(
 )
 
 app.use(passport.initialize())
+app.use(passport.session())
+
+function checkLoggedIn(req, res, next) {
+  const isLoggedIn = true
+  if (!isLoggedIn) {
+    res.status(401).json({
+      error: 'You must log in!',
+    })
+  }
+  next()
+}
 
 app.get(
   '/auth/google',
@@ -67,7 +76,7 @@ app.get(
   passport.authenticate('google', {
     failureRedirect: '/failure',
     successRedirect: '/',
-    session: false,
+    session: true,
   }),
   (req, res) => {
     console.log('Google Called us back')
