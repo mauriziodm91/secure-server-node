@@ -3,7 +3,6 @@ const https = require('https')
 const express = require('express')
 const path = require('path')
 const helmet = require('helmet')
-const dotenv = require('dotenv')
 const passport = require('passport')
 const cookieSession = require('cookie-session')
 const { Strategy } = require('passport-google-oauth20')
@@ -31,10 +30,11 @@ function verifyCallback(accessToken, refreshToken, profile, done) {
 
 passport.use(new Strategy(AUTH_OPTIONS, verifyCallback))
 
+//Save the session to the cookie
 passport.serializeUser((user, done) => {
   done(null, user)
 })
-
+//reading the session from the cookie
 passport.deserializeUser((obj, done) => {
   done(null, obj)
 })
