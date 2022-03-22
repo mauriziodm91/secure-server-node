@@ -32,7 +32,7 @@ passport.use(new Strategy(AUTH_OPTIONS, verifyCallback))
 
 //Save the session to the cookie
 passport.serializeUser((user, done) => {
-  done(null, user)
+  done(null, user.id)
 })
 //reading the session from the cookie
 passport.deserializeUser((obj, done) => {
@@ -55,7 +55,8 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 function checkLoggedIn(req, res, next) {
-  const isLoggedIn = true
+  console.log('the id is: ', req.user)
+  const isLoggedIn = req.isAuthenticated() && req.user
   if (!isLoggedIn) {
     res.status(401).json({
       error: 'You must log in!',
@@ -83,7 +84,10 @@ app.get(
   }
 )
 
-app.get('/auth/logout', (req, res) => {})
+app.get('/auth/logout', (req, res) => {
+  req.logout() //Removes req.user and clears any logged in session
+  res.redirect('/')
+})
 
 app.get('/secret', checkLoggedIn, (req, res) => {
   return res.send('the secret is 45')
